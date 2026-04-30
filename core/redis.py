@@ -24,21 +24,22 @@ async def init_redis() -> None:
     """初始化 Redis 连接池，在应用启动时调用。"""
     global redis_client
     logger.info("正在连接 Redis...")
-    redis_client = aioredis.from_url(
+    client = aioredis.from_url(
         settings.REDIS_URL,
         encoding="utf-8",
         decode_responses=True,
         max_connections=settings.REDIS_MAX_CONNECTIONS,
     )
     # 验证连接
-    await redis_client.ping()
+    await client.ping()
+    redis_client = client
     logger.info(f"Redis 连接成功：{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}")
 
 
 async def close_redis() -> None:
     """关闭 Redis 连接池，在应用关闭时调用。"""
     global redis_client
-    if redis_client:
+    if redis_client is not None:
         await redis_client.aclose()
         redis_client = None
         logger.info("Redis 连接已关闭")

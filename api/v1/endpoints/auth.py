@@ -10,7 +10,7 @@ router = APIRouter()
 
 
 @router.post("/login", response_model=Response[TokenResponse], summary="登录获取 Token")
-async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+async def login(form_data: OAuth2PasswordRequestForm = Depends()) -> Response[TokenResponse]:
     user = await UserService.get_by_username(form_data.username)
     if not user or not verify_password(form_data.password, user.hashed_password):
         raise HTTPException(

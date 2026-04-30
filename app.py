@@ -14,6 +14,7 @@ shutdown（反序）:
   3. 关闭 MySQL
 """
 
+from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -30,7 +31,7 @@ from tasks.scheduler import register_jobs, scheduler
 
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     """
     应用生命周期管理。
     yield 前 = startup，yield 后 = shutdown。

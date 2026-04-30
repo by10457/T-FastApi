@@ -28,13 +28,16 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     )
     try:
         payload = decode_access_token(token)
-        user_id: str = payload.get("sub")
-        if user_id is None:
+        subject = payload.get("sub")
+        if not isinstance(subject, str):
             raise credentials_exception
+        user_id = int(subject)
+    except ValueError:
+        raise credentials_exception from None
     except JWTError:
         raise credentials_exception from None
 
-    user = await User.filter(id=int(user_id), is_active=True).first()
+    user = await User.filter(id=user_id, is_active=True).first()
     if user is None:
         raise credentials_exception
     return user

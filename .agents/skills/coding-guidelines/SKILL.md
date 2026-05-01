@@ -83,7 +83,7 @@ description: T-FastApi 项目的 AI 编码行为准则，用于减少常见 LLM 
 | 场景 | 应用准则 |
 |------|---------|
 | 修改 API 接口 | 路由层只做参数、依赖和响应组装；业务逻辑放 `services/` |
-| 新增业务模块 | 按 `models/`、`schemas/`、`services/`、`api/v1/endpoints/` 的最小闭环落代码 |
+| 新增业务模块 | 按 `models/`、`schemas/`、`services/`、`api/v1/` 的最小闭环落代码 |
 | 修改 ORM 模型 | 同步检查 `core/config.py` 的 `TORTOISE_ORM` 注册和 Aerich 迁移影响 |
 | 修复类型问题 | 优先补准确类型和返回值，不用 `Any` 或 `# type: ignore` 盖住问题 |
 | Ruff/Mypy 报错 | 修复报错本身，不借机批量重排无关文件 |

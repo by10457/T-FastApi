@@ -1,8 +1,8 @@
 from fastapi import APIRouter
 from tortoise import connections
 
+from core import redis as redis_module
 from core.logger import logger
-from core.redis import redis_client
 from schemas.common import Response
 
 router = APIRouter()
@@ -25,8 +25,8 @@ async def health_check() -> Response[dict[str, str]]:
         logger.debug(f"健康检查 MySQL 探测失败：{exc}")
 
     try:
-        if redis_client:
-            await redis_client.ping()
+        if redis_module.redis_client:
+            await redis_module.redis_client.ping()
             redis_ok = True
     except Exception as exc:
         logger.debug(f"健康检查 Redis 探测失败：{exc}")

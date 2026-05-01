@@ -5,7 +5,7 @@
 | 目录 | 职责 |
 | --- | --- |
 | `api/` | 接口层，定义路由、依赖、权限、请求参数和响应组装 |
-| `api/v1/endpoints/` | 按业务模块拆分路由文件 |
+| `api/v1/` | 按业务模块拆分版本化路由文件 |
 | `schemas/` | Pydantic 请求体、响应体、统一响应结构 |
 | `services/` | 业务逻辑层，不写 HTTP 细节 |
 | `models/` | Tortoise-ORM 数据库模型 |
@@ -20,7 +20,7 @@
 1. 在 `models/` 新建或修改 ORM 模型，并到 `core/config.py` 的 `TORTOISE_ORM` 配置中注册。
 2. 在 `schemas/` 定义请求和响应结构。
 3. 在 `services/` 实现业务逻辑，保持可测试，不依赖 FastAPI `Request`。
-4. 在 `api/v1/endpoints/` 定义路由，只做依赖注入、参数校验、权限检查和调用 service。
+4. 在 `api/v1/` 定义路由，只做依赖注入、参数校验、权限检查和调用 service。
 5. 在 `api/v1/__init__.py` 注册路由。
 6. 修改模型后运行 `uv run aerich migrate --name "<change_name>"` 和 `uv run aerich upgrade`。
 

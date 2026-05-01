@@ -6,9 +6,9 @@ v1 版本路由汇总
 
 from fastapi import APIRouter
 
-from api.v1.endpoints.auth import router as auth_router
-from api.v1.endpoints.health import router as health_router
-from api.v1.endpoints.user import router as user_router
+from api.v1.auth import router as auth_router
+from api.v1.health import router as health_router
+from api.v1.user import router as user_router
 
 router = APIRouter()
 

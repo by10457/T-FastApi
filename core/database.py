@@ -1,7 +1,7 @@
 """
 MySQL 连接管理（Tortoise-ORM）
 
-连接的初始化和关闭统一在 app.py 的 lifespan 里调用，
+连接的初始化和关闭在 app.py lifespan 或 tasks.runner 中调用，
 业务代码中直接使用 ORM 模型即可，无需手动获取连接。
 
 aerich 迁移命令：

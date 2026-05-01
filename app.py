@@ -6,10 +6,10 @@ startup:
   1. 初始化日志（import 即生效）
   2. 连接 MySQL
   3. 连接 Redis
-  4. 注册并启动定时任务
+  4. 开发环境注册并启动定时任务
 
 shutdown（反序）:
-  1. 停止定时任务
+  1. 停止开发环境定时任务
   2. 关闭 Redis
   3. 关闭 MySQL
 """
@@ -42,9 +42,10 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await init_db()
     await init_redis()
 
-    register_jobs()
-    scheduler.start()
-    logger.info("⏰ 定时任务调度器已启动")
+    if settings.APP_DEBUG:
+        register_jobs()
+        scheduler.start()
+        logger.info("⏰ 开发环境定时任务调度器已启动")
 
     logger.info("✅ 应用启动完成，开始接收请求")
     yield
@@ -52,8 +53,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     # ── Shutdown ──────────────────────────────────────────
     logger.info("🛑 应用正在关闭...")
 
-    scheduler.shutdown(wait=False)
-    logger.info("⏰ 定时任务调度器已停止")
+    if scheduler.running:
+        scheduler.shutdown(wait=False)
+        logger.info("⏰ 定时任务调度器已停止")
 
     await close_redis()
     await close_db()

@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
     APP_HOST: str = "0.0.0.0"
-    APP_PORT: int = 8000
+    APP_PORT: int = 10457
     WEB_CONCURRENCY: int | None = Field(default=None, ge=1)
     SECRET_KEY: str = "change-me-in-production"
 

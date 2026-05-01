@@ -5,7 +5,7 @@
 - 调度器实例在本文件声明（scheduler）
 - 每个任务函数写在 tasks/ 目录的对应模块里（如 tasks/cleanup.py）
 - 任务注册统一在 register_jobs() 里完成
-- 调度器的启动/停止在 app.py lifespan 里调用，不在这里
+- 开发环境由 app.py lifespan 启停，生产环境由 tasks.runner 独立进程启停
 
 【任务类型说明】
 - interval : 每隔固定时间执行，适合轮询类任务
@@ -49,7 +49,7 @@ async def task_daily_cleanup() -> None:
 def register_jobs() -> None:
     """
     统一注册所有定时任务。
-    在 app.py lifespan 的 startup 阶段调用。
+    在 tasks.runner 的启动阶段调用。
     """
     # 每 60 秒执行一次（interval 模式）
     scheduler.add_job(

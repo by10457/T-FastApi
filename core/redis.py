@@ -2,12 +2,12 @@
 Redis 连接管理
 
 采用模块级单例模式：
-    from core.redis import redis_client
-    await redis_client.set("key", "value")
-    val = await redis_client.get("key")
+    from core import redis as redis_module
+    if redis_module.redis_client is not None:
+        await redis_module.redis_client.set("key", "value")
 
-连接池在 app.py lifespan 里初始化/关闭，
-其他地方直接 import redis_client 使用即可。
+连接池在 app.py lifespan 或 tasks.runner 中初始化/关闭，
+其他模块需要读取 redis_client 时，应通过 redis_module.redis_client 获取最新引用。
 """
 
 import redis.asyncio as aioredis
@@ -48,7 +48,7 @@ async def close_redis() -> None:
 def get_redis() -> Redis:
     """
     供 FastAPI 依赖注入使用（可选）。
-    更简单的方式是直接 import redis_client。
+    需要允许 Redis 未初始化时优雅降级的地方，可直接读取 redis_module.redis_client。
     """
     if redis_client is None:
         raise RuntimeError("Redis 尚未初始化，请检查 lifespan 是否正确执行")

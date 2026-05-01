@@ -14,7 +14,8 @@
 ├── .env                    # 实际环境变量（不提交！）
 │
 ├── api/                    # 接口层：路由定义，只做参数校验和调用 service
-│   ├── deps.py             # 公共依赖注入（获取当前用户、权限校验等）
+│   ├── dependencies/       # FastAPI 依赖注入（获取当前用户、权限校验等）
+│   │   └── auth.py         # 认证与权限依赖
 │   └── v1/
 │       ├── auth.py         # 认证路由
 │       ├── health.py       # 健康检查路由
@@ -30,6 +31,7 @@
 ├── models/                 # ORM 数据库模型（与数据表一一对应）
 ├── schemas/                # Pydantic 请求/响应类型定义
 ├── services/               # 业务逻辑层（不含 HTTP 相关代码）
+├── middlewares/            # 全局中间件（请求日志、请求 ID、耗时统计等）
 │
 ├── tasks/                  # 定时任务
 │   ├── scheduler.py        # 调度器实例 + 任务注册函数
@@ -68,7 +70,7 @@ uv run python main.py
 
 ```bash
 # 生成迁移文件（修改 models 后执行）
-uv run aerich migrate --name "add_user_table"
+uv run aerich migrate --name "simplify_user_table"
 
 # 应用迁移
 uv run aerich upgrade
@@ -76,6 +78,17 @@ uv run aerich upgrade
 # 运行测试
 uv run pytest tests/ -v
 ```
+
+## 内置接口演示
+
+启动后访问 `/`，会自动打开 `public/index.html`，可以在静态页面里完成用户注册、登录、带 JWT 查询当前用户、更新当前用户信息。
+
+当前模板只保留一张 `users` 表，接口示例聚焦普通用户认证流程：
+
+- `POST /api/v1/users/register`：注册用户
+- `POST /api/v1/auth/login`：登录并获取 JWT
+- `GET /api/v1/users/userInfo`：带 JWT 查询当前用户
+- `POST /api/v1/users/updateInfo`：带 JWT 更新当前用户
 
 ## Docker 部署
 

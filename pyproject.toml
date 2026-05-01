@@ -7,9 +7,9 @@ requires-python = ">=3.13"
 dependencies = [
     "aerich==0.7.2",
     "apscheduler==3.10.4",
+    "bcrypt==5.0.0",
     "fastapi==0.111.0",
     "loguru==0.7.2",
-    "passlib[bcrypt]==1.7.4",
     "pydantic-settings==2.2.1",
     "python-dotenv==1.0.1",
     "python-jose[cryptography]==3.3.0",

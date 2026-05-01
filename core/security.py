@@ -5,23 +5,33 @@
 from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 
+import bcrypt
 from jose import jwt
-from passlib.context import CryptContext
 
 from core.config import settings
 
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 小时
+MAX_BCRYPT_PASSWORD_BYTES = 72
+
+
+def _password_to_bytes(password: str) -> bytes:
+    password_bytes = password.encode("utf-8")
+    if len(password_bytes) > MAX_BCRYPT_PASSWORD_BYTES:
+        raise ValueError("密码 UTF-8 编码后不能超过 72 字节")
+    return password_bytes
 
 
 def hash_password(password: str) -> str:
-    return cast(str, pwd_context.hash(password))
+    password_bytes = _password_to_bytes(password)
+    return bcrypt.hashpw(password_bytes, bcrypt.gensalt()).decode("utf-8")
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return cast(bool, pwd_context.verify(plain, hashed))
+    try:
+        return bcrypt.checkpw(_password_to_bytes(plain), hashed.encode("utf-8"))
+    except ValueError:
+        return False
 
 
 def create_access_token(

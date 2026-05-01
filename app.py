@@ -14,10 +14,13 @@ shutdown（反序）:
   3. 关闭 MySQL
 """
 
-from collections.abc import AsyncIterator
+import socket
+from collections.abc import AsyncIterator, Awaitable, Callable
 from contextlib import asynccontextmanager
+from pathlib import Path
+from typing import cast
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -28,6 +31,39 @@ from core.database import close_db, init_db
 from core.logger import logger
 from core.redis import close_redis, init_redis
 from tasks.scheduler import register_jobs, scheduler
+
+PUBLIC_DIR = Path(__file__).resolve().parent / "public"
+_NO_CACHE_EXTS = {".js", ".css", ".html"}
+
+
+def _detect_lan_ip() -> str | None:
+    """探测当前机器在局域网中的出口 IP。"""
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sock:
+            sock.connect(("8.8.8.8", 80))
+            host = cast(str, sock.getsockname()[0])
+    except OSError:
+        return None
+    if host.startswith("127."):
+        return None
+    return host
+
+
+def _log_access_urls() -> None:
+    """输出本地和局域网访问地址。"""
+    local_base = f"http://localhost:{settings.APP_PORT}"
+    logger.info("FastAPI service is ready")
+    logger.info(f"Local site: {local_base}/index.html")
+    if settings.APP_DEBUG:
+        logger.info(f"API docs: {local_base}/docs")
+
+    if settings.APP_HOST == "0.0.0.0":
+        lan_ip = _detect_lan_ip()
+        if lan_ip:
+            lan_base = f"http://{lan_ip}:{settings.APP_PORT}"
+            logger.info(f"LAN site: {lan_base}/index.html")
+            if settings.APP_DEBUG:
+                logger.info(f"LAN docs: {lan_base}/docs")
 
 
 @asynccontextmanager
@@ -47,6 +83,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         scheduler.start()
         logger.info("⏰ 开发环境定时任务调度器已启动")
 
+    _log_access_urls()
     logger.info("✅ 应用启动完成，开始接收请求")
     yield
 
@@ -83,10 +120,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ── 静态文件 ──────────────────────────────────────────────────
 
-app.mount("/static", StaticFiles(directory="public"), name="static")
+# ── 静态资源缓存控制中间件 ──────────────────────────────────────
+# StaticFiles 默认不设置 Cache-Control，浏览器会按启发式规则自行缓存，
+# 导致修改 JS/CSS/HTML 后刷新页面仍拿到旧文件。
+# 此中间件对静态入口和 .js/.css/.html 强制加 no-cache，开发阶段始终获取最新版本。
+
+
+@app.middleware("http")
+async def no_cache_for_static(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
+    response = await call_next(request)
+    path = request.url.path
+    if path == "/" or any(path.endswith(ext) for ext in _NO_CACHE_EXTS):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
 
 # ── 路由挂载 ──────────────────────────────────────────────────
 
 app.include_router(v1_router, prefix="/api/v1")
+
+# ── 静态文件（最后挂载，避免拦截 API 请求）──────────────────────
+
+if PUBLIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=str(PUBLIC_DIR), html=True), name="static")
+else:
+    logger.warning(f"静态目录不存在：{PUBLIC_DIR}")

@@ -1,12 +1,12 @@
 """
-公共依赖注入
+认证与权限依赖
 
 FastAPI 的依赖注入系统让你可以把「获取当前用户」
 「验证权限」等逻辑抽成可复用的函数，在路由上直接声明使用。
 
 使用方式：
-    @router.get("/me")
-    async def get_me(current_user: User = Depends(get_current_user)):
+    @router.get("/userInfo")
+    async def get_user_info(current_user: User = Depends(get_current_user)):
         ...
 """
 
@@ -21,6 +21,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 
 
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
+    """校验 JWT 并返回当前登录用户。"""
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="无效的凭证",
@@ -37,18 +38,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     except JWTError:
         raise credentials_exception from None
 
-    user = await User.filter(id=user_id, is_active=True).first()
+    user = await User.filter(id=user_id).first()
     if user is None:
         raise credentials_exception
     return user
-
-
-async def get_current_superuser(
-    current_user: User = Depends(get_current_user),
-) -> User:
-    if not current_user.is_superuser:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="权限不足",
-        )
-    return current_user

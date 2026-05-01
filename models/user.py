@@ -9,10 +9,10 @@ from models.base import BaseModel
 
 class User(BaseModel):
     username = fields.CharField(max_length=64, unique=True, description="用户名")
-    email = fields.CharField(max_length=128, unique=True, description="邮箱")
     hashed_password = fields.CharField(max_length=256, description="哈希密码")
-    is_active = fields.BooleanField(default=True, description="是否激活")
-    is_superuser = fields.BooleanField(default=False, description="是否超级管理员")
+    avatar = fields.CharField(max_length=512, null=True, description="头像地址")
+    nickname = fields.CharField(max_length=64, null=True, description="昵称")
+    email = fields.CharField(max_length=128, unique=True, description="邮箱")
 
     class Meta:
         table = "users"

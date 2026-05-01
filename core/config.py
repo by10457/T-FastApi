@@ -36,6 +36,7 @@ class Settings(BaseSettings):
     MYSQL_DB: str = "app"
     MYSQL_POOL_MIN: int = 3
     MYSQL_POOL_MAX: int = 10
+    DB_GENERATE_SCHEMAS: bool = False
 
     @property
     def TORTOISE_DATABASE_URL(self) -> str:

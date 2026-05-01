@@ -23,9 +23,13 @@ async def init_db() -> None:
     """初始化数据库连接池，在应用启动时调用。"""
     logger.info("正在连接 MySQL...")
     await Tortoise.init(config=settings.TORTOISE_ORM)
-    # generate_schemas=False：表结构由 aerich 迁移管理，不自动建表
-    # 开发调试时可临时改为 True
-    await Tortoise.generate_schemas(safe=True)
+
+    # 默认不在应用启动时自动建表，表结构由 aerich 迁移或 sql/init.sql 管理。
+    # 仅开发调试需要快速生成缺失表时，设置 DB_GENERATE_SCHEMAS=true。
+    if settings.DB_GENERATE_SCHEMAS:
+        logger.warning("DB_GENERATE_SCHEMAS=true，正在自动生成缺失表结构，仅建议开发环境使用")
+        await Tortoise.generate_schemas(safe=True)
+
     logger.info(f"MySQL 连接成功：{settings.MYSQL_HOST}:{settings.MYSQL_PORT}/{settings.MYSQL_DB}")
 
 

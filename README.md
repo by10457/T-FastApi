@@ -60,6 +60,8 @@ uv run aerich init-db
 uv run python main.py
 ```
 
+默认情况下，应用启动只连接数据库，不会自动创建表结构。表结构推荐通过 aerich 迁移维护；如果只是本地临时调试，也可以设置 `DB_GENERATE_SCHEMAS=true` 让 Tortoise 在启动时自动创建缺失表。
+
 生产环境可在 `.env` 中设置 `APP_DEBUG=false`，并按服务规格显式设置 `WEB_CONCURRENCY` 控制 worker 进程数。未设置 `WEB_CONCURRENCY` 时，模板默认使用 `min(CPU 核心数, 4)`，避免容器或多核机器上自动开出过多进程。
 
 ## 常用命令

@@ -11,6 +11,7 @@
 ├── pyproject.toml          # uv 依赖管理 + aerich 迁移工具配置 + pytest 配置
 ├── uv.lock                 # uv 锁文件
 ├── .env.example            # 环境变量模板（提交到仓库）
+├── .env.docker             # 实际docker运行环境变量（不提交！）
 ├── .env                    # 实际环境变量（不提交！）
 │
 ├── api/                    # 接口层：路由定义，只做参数校验和调用 service

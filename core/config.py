@@ -26,6 +26,7 @@ class Settings(BaseSettings):
     APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 10457
     WEB_CONCURRENCY: int | None = Field(default=None, ge=1)
+    SCHEDULER_ENABLED: bool = True
     SECRET_KEY: str = "change-me-in-production"
 
     # ── MySQL ─────────────────────────────────────────────

@@ -11,6 +11,7 @@ import asyncio
 import signal
 from types import FrameType
 
+from core.config import settings
 from core.database import close_db, init_db
 from core.logger import logger
 from core.redis import close_redis, init_redis
@@ -43,6 +44,10 @@ def _install_signal_handlers(stop_event: asyncio.Event) -> None:
 
 async def run_scheduler() -> None:
     """初始化基础设施并持续运行 APScheduler。"""
+    if not settings.SCHEDULER_ENABLED:
+        logger.info("⏸️ 定时任务已通过 SCHEDULER_ENABLED=false 关闭")
+        return
+
     stop_event = asyncio.Event()
     _install_signal_handlers(stop_event)
 

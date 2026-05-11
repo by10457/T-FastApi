@@ -35,7 +35,8 @@ Usage:
 Optional environment variables:
   IMAGE_NAME        Docker image tag (default: t-fastapi:latest)
   APP_ROLE          Container role: auto, all, api or scheduler (default: auto)
-                    auto: APP_DEBUG=true starts api only; otherwise starts api+scheduler.
+                    auto: APP_DEBUG=true or SCHEDULER_ENABLED=false starts api only;
+                    otherwise starts api+scheduler.
   CONTAINER_NAME    Docker container name (default: t-fastapi or t-fastapi-scheduler)
   ENV_FILE          Env file path passed to docker run (default: .env)
   HOST_PORT         Host port exposed outside Docker (default: APP_PORT in env file, fallback 10457)
@@ -205,14 +206,33 @@ esac
 sanitize_env_file
 
 APP_DEBUG_VALUE=$(read_env_value APP_DEBUG)
+SCHEDULER_ENABLED_VALUE=$(read_env_value SCHEDULER_ENABLED)
+[ -n "$SCHEDULER_ENABLED_VALUE" ] || SCHEDULER_ENABLED_VALUE="true"
+SCHEDULER_ENABLED="false"
+if is_truthy "$SCHEDULER_ENABLED_VALUE"; then
+  SCHEDULER_ENABLED="true"
+fi
+
 if [ "$APP_ROLE" = "auto" ]; then
-  if is_truthy "$APP_DEBUG_VALUE"; then
+  if is_truthy "$APP_DEBUG_VALUE" || [ "$SCHEDULER_ENABLED" != "true" ]; then
     RESOLVED_APP_ROLE="api"
   else
     RESOLVED_APP_ROLE="all"
   fi
 else
   RESOLVED_APP_ROLE="$APP_ROLE"
+fi
+
+if [ "$SCHEDULER_ENABLED" != "true" ]; then
+  case "$RESOLVED_APP_ROLE" in
+    all)
+      log "SCHEDULER_ENABLED=false, APP_ROLE=all will run api only."
+      RESOLVED_APP_ROLE="api"
+      ;;
+    scheduler)
+      fail "SCHEDULER_ENABLED=false, APP_ROLE=scheduler has no scheduler process to start."
+      ;;
+  esac
 fi
 
 if [ -z "${CONTAINER_NAME:-}" ]; then

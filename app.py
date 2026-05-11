@@ -78,10 +78,12 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     await init_db()
     await init_redis()
 
-    if settings.APP_DEBUG:
+    if settings.APP_DEBUG and settings.SCHEDULER_ENABLED:
         register_jobs()
         scheduler.start()
         logger.info("⏰ 开发环境定时任务调度器已启动")
+    elif settings.APP_DEBUG:
+        logger.info("⏸️ 开发环境定时任务已通过 SCHEDULER_ENABLED=false 关闭")
 
     _log_access_urls()
     logger.info("✅ 应用启动完成，开始接收请求")

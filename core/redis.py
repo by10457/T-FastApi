@@ -20,7 +20,7 @@ from core.logger import logger
 redis_client: Redis | None = None
 
 
-async def init_redis() -> None:
+async def init_redis() -> bool:
     """初始化 Redis 连接池，在应用启动时调用。"""
     global redis_client
     logger.info("正在连接 Redis...")
@@ -31,9 +31,17 @@ async def init_redis() -> None:
         max_connections=settings.REDIS_MAX_CONNECTIONS,
     )
     # 验证连接
-    await client.ping()
+    try:
+        await client.ping()
+    except Exception as exc:
+        await client.aclose()
+        redis_client = None
+        logger.warning(f"Redis 未连接，应用将继续启动：{type(exc).__name__}: {exc}")
+        return False
+
     redis_client = client
     logger.info(f"Redis 连接成功：{settings.REDIS_HOST}:{settings.REDIS_PORT}/{settings.REDIS_DB}")
+    return True
 
 
 async def close_redis() -> None:

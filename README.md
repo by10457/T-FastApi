@@ -62,7 +62,9 @@ uv run aerich init-db
 uv run python main.py
 ```
 
-默认情况下，应用启动只连接数据库，不会自动创建表结构。表结构推荐通过 aerich 迁移维护；如果只是本地临时调试，也可以设置 `DB_GENERATE_SCHEMAS=true` 让 Tortoise 在启动时自动创建缺失表。
+默认情况下，应用启动会尝试连接 MySQL 和 Redis；如果连接失败，只会在控制台打印未连接警告，应用仍会继续启动。这样基于模板开发纯 API、纯静态页或暂时不使用数据库/缓存的项目，也可以先跑起来。真正调用依赖 MySQL/Redis 的接口时，仍需要保证对应服务可用。
+
+应用启动不会自动创建表结构。表结构推荐通过 aerich 迁移维护；如果只是本地临时调试，也可以设置 `DB_GENERATE_SCHEMAS=true` 让 Tortoise 在启动时自动创建缺失表。
 
 生产环境可在 `.env` 中设置 `APP_DEBUG=false`，并按服务规格显式设置 `WEB_CONCURRENCY` 控制 worker 进程数。未设置 `WEB_CONCURRENCY` 时，模板默认使用 `min(CPU 核心数, 4)`，避免容器或多核机器上自动开出过多进程。
 
@@ -212,6 +214,7 @@ ENV_FILE=.env.docker sh start.sh
 | 问题 | 决策 |
 |------|------|
 | MySQL/Redis 连接对象在哪初始化？| `core/database.py` 和 `core/redis.py` 声明，由 `app.py` lifespan 或 `tasks.runner` 统一 init/close |
+| MySQL/Redis 连接失败怎么办？| 启动阶段只打印 warning 并继续运行；健康检查会返回 degraded，依赖数据库/缓存的接口在调用时再暴露具体错误 |
 | 定时任务写在哪？| `tasks/scheduler.py` 写任务和注册函数；开发环境由 `app.py` 启动，生产环境由 `tasks.runner` 独立进程启动 |
 | 环境变量怎么管理？| `core/config.py` 用 pydantic-settings 读取，全项目只 import `settings` 对象 |
 | 接口统一响应格式？| `schemas/common.py` 的 `Response[T]` 泛型包装 |

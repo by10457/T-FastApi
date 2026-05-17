@@ -24,7 +24,7 @@ ASGIApp = Callable[[ASGIMessage, ASGIReceive, ASGISend], Coroutine[None, None, N
 async def test_health() -> None:
     # FastAPI 是合法 ASGI 应用；这里收窄类型以匹配 httpx 0.27 的 ASGITransport 标注。
     async with AsyncClient(transport=ASGITransport(app=cast(ASGIApp, app)), base_url="http://test") as client:
-        response = await client.get("/api/v1/health")
+        response = await client.get("/api/health")
     assert response.status_code == 200
     data = response.json()
     assert data["code"] == 200

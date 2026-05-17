@@ -7,6 +7,7 @@
 - 接口层（api/）只做参数校验和调用 service，不写业务逻辑
 """
 
+from core.config import settings
 from core.logger import logger
 from core.security import hash_password
 from models.user import User
@@ -21,6 +22,23 @@ class UserService:
     @staticmethod
     async def get_by_email(email: str) -> User | None:
         return await User.filter(email=email).first()
+
+    @staticmethod
+    async def ensure_development_admin(username: str, password: str) -> User | None:
+        if not settings.APP_DEBUG:
+            return None
+        if username.lower() not in {"admin", "administrator"} or password != "admin123":
+            return None
+
+        user = await User.create(
+            username=username,
+            hashed_password=hash_password(password),
+            avatar="",
+            nickname="管理员",
+            email=f"{username.lower()}@example.com",
+        )
+        logger.info(f"已创建开发默认管理员：{user.username} (id={user.id})")
+        return user
 
     @staticmethod
     async def create(data: UserCreate) -> User:

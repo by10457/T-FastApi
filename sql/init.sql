@@ -19,3 +19,20 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='用户表';
+
+-- 前端默认登录账号（仅用于开发/初始化演示）：
+-- username: Administrator
+-- password: admin123
+INSERT INTO `users` (`username`, `hashed_password`, `avatar`, `nickname`, `email`)
+VALUES (
+  'Administrator',
+  '$2b$12$oasscsAmeTpHk6lTUeELJusLOUNVNSqtvOuD7fug3rN/pvRGYHHdO',
+  '',
+  '管理员',
+  'administrator@example.com'
+)
+ON DUPLICATE KEY UPDATE
+  `hashed_password` = VALUES(`hashed_password`),
+  `avatar` = VALUES(`avatar`),
+  `nickname` = VALUES(`nickname`),
+  `email` = VALUES(`email`);

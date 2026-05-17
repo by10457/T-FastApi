@@ -47,8 +47,3 @@ class UserResponse(BaseModel):
     updated_at: datetime
 
     model_config = {"from_attributes": True}  # 支持从 ORM 对象直接转换
-
-
-class TokenResponse(BaseModel):
-    access_token: str
-    token_type: str = "bearer"

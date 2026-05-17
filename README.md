@@ -84,14 +84,16 @@ uv run pytest tests/ -v
 
 ## 内置接口演示
 
-启动后访问 `/`，会自动打开 `public/index.html`，可以在静态页面里完成用户注册、登录、带 JWT 查询当前用户、更新当前用户信息。
+启动后访问 `/`，会自动打开 `public/index.html`。
 
-当前模板只保留一张 `users` 表，接口示例聚焦普通用户认证流程：
+当前模板只保留一张 `users` 表，接口聚焦与前端管理系统对齐的登录主链路：
 
-- `POST /api/v1/users/register`：注册用户
-- `POST /api/v1/auth/login`：登录并获取 JWT
-- `GET /api/v1/users/userInfo`：带 JWT 查询当前用户
-- `POST /api/v1/users/updateInfo`：带 JWT 更新当前用户
+- `POST /api/auth/login`：登录并获取 accessToken，同时写入 refreshToken Cookie
+- `POST /api/auth/refresh`：根据 refreshToken Cookie 刷新 accessToken
+- `POST /api/auth/logout`：退出登录并清理 refreshToken Cookie
+- `GET /api/user/info`：带 accessToken 查询当前用户
+- `GET /api/auth/codes`：带 accessToken 查询按钮权限码
+- `GET /api/menu/all`：带 accessToken 查询后端动态菜单
 
 ## Docker 部署
 

@@ -24,8 +24,7 @@ from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-# 路由注册（按版本组织）
-from api.v1 import router as v1_router
+from api import router as api_router
 from core.config import settings
 from core.database import close_db, init_db
 from core.logger import logger
@@ -142,7 +141,7 @@ async def no_cache_for_static(request: Request, call_next: Callable[[Request], A
 
 # ── 路由挂载 ──────────────────────────────────────────────────
 
-app.include_router(v1_router, prefix="/api/v1")
+app.include_router(api_router, prefix="/api")
 
 # ── 静态文件（最后挂载，避免拦截 API 请求）──────────────────────
 

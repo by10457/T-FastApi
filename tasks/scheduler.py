@@ -17,10 +17,11 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from apscheduler.triggers.interval import IntervalTrigger
 
+from core.config import settings
 from core.logger import logger
 
 # 全局调度器单例（异步模式，与 FastAPI 的事件循环共享）
-scheduler = AsyncIOScheduler(timezone="Asia/Shanghai")
+scheduler = AsyncIOScheduler(timezone=settings.TIMEZONE)
 
 
 # ──────────────────────────────────────────────────────────────

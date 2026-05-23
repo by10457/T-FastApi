@@ -69,6 +69,8 @@ uv run python main.py
 
 生产环境可在 `.env` 中设置 `APP_DEBUG=false`，并按服务规格显式设置 `WEB_CONCURRENCY` 控制 worker 进程数。未设置 `WEB_CONCURRENCY` 时，模板默认使用 `min(CPU 核心数, 4)`，避免容器或多核机器上自动开出过多进程。
 
+应用默认 `TIMEZONE=Asia/Shanghai`，该配置会同时传给 Tortoise-ORM 与 APScheduler。Tortoise-ORM 未显式配置时默认使用 UTC，使用 `created_at` / `updated_at` 等自动时间字段时会出现中国时区项目常见的 8 小时偏移。
+
 ## 常用命令
 
 ```bash

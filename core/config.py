@@ -27,6 +27,7 @@ class Settings(BaseSettings):
     APP_PORT: int = 10457
     WEB_CONCURRENCY: int | None = Field(default=None, ge=1)
     SCHEDULER_ENABLED: bool = True
+    TIMEZONE: str = "Asia/Shanghai"
     SECRET_KEY: str = "change-me-in-production"
 
     # ── MySQL ─────────────────────────────────────────────
@@ -85,6 +86,7 @@ class Settings(BaseSettings):
                     "default_connection": "default",
                 }
             },
+            "timezone": self.TIMEZONE,
         }
 
 

@@ -86,6 +86,7 @@ class Settings(BaseSettings):
                     "default_connection": "default",
                 }
             },
+            "use_tz": False,
             "timezone": self.TIMEZONE,
         }
 
